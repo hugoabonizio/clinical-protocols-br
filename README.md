@@ -35,14 +35,26 @@ Our 14B open model outperforms every proprietary frontier baseline on both bench
 
 ## Released artifacts
 
-Datasets on HuggingFace:
+Everything is collected in the [Protocolos Clínicos BR collection on HuggingFace](https://huggingface.co/collections/hugo/protocolos-clinicos-br-69f7a8b93b1c28c0914594ff).
 
-- [`hugo/protocolos-clinicos-v1`](https://huggingface.co/datasets/hugo/protocolos-clinicos-v1) — 178 clinical guidelines extracted from the official PDFs
-- [`hugo/protocolos-clinicos-v1-augmented`](https://huggingface.co/datasets/hugo/protocolos-clinicos-v1-augmented) — synthetic CPT corpus (rephrase, wiki, QA × 4 generators)
-- [`hugo/healthbench-br-v1`](https://huggingface.co/datasets/hugo/healthbench-br-v1) — true/false benchmark
-- [`hugo/health-qa-br-v1`](https://huggingface.co/datasets/hugo/health-qa-br-v1) — open-ended QA benchmark
+**Datasets**
 
-Model weights: coming soon.
+- [`hugo/protocolos-clinicos-br`](https://huggingface.co/datasets/hugo/protocolos-clinicos-br) — the 178 raw guidelines (default config) plus the 13 synthetic configs used for CPT
+- [`hugo/healthbench-br`](https://huggingface.co/datasets/hugo/healthbench-br) — true/false benchmark
+- [`hugo/pcdt-qa`](https://huggingface.co/datasets/hugo/pcdt-qa) — open-ended QA benchmark
+
+**Models** (Qwen2.5-14B-Instruct base, with test-split accuracy on HB-BR / PCDT-QA)
+
+| Model | HB | PCDT |
+|---|---|---|
+| [`protocolos-clinicos-br-rl-4gen-14b`](https://huggingface.co/hugo/protocolos-clinicos-br-rl-4gen-14b) ⭐ — CPT (4 gen) + GRPO LoRA *(best)* | 83.9 | 85.4 |
+| [`protocolos-clinicos-br-rl-1gen-14b`](https://huggingface.co/hugo/protocolos-clinicos-br-rl-1gen-14b) — CPT (1 gen) + GRPO LoRA | 75.6 | 65.4 |
+| [`protocolos-clinicos-br-cpt-4gen-14b`](https://huggingface.co/hugo/protocolos-clinicos-br-cpt-4gen-14b) — CPT (4 generators), full FT | 71.1 | 86.3 |
+| [`protocolos-clinicos-br-cpt-1gen-14b`](https://huggingface.co/hugo/protocolos-clinicos-br-cpt-1gen-14b) — CPT (1 generator), full FT | 69.6 | 66.3 |
+| [`protocolos-clinicos-br-cpt_lora-4gen-14b`](https://huggingface.co/hugo/protocolos-clinicos-br-cpt_lora-4gen-14b) — CPT (4 gen) via LoRA | 70.3 | 77.1 |
+| [`protocolos-clinicos-br-cpt_lora-1gen-14b`](https://huggingface.co/hugo/protocolos-clinicos-br-cpt_lora-1gen-14b) — CPT (1 gen) via LoRA | 67.2 | 65.2 |
+| [`protocolos-clinicos-br-cpt_replay-1gen-14b`](https://huggingface.co/hugo/protocolos-clinicos-br-cpt_replay-1gen-14b) — CPT (1 gen) + FineWeb-EN replay | 63.8 | 65.6 |
+| [`protocolos-clinicos-br-base_rl-1gen-14b`](https://huggingface.co/hugo/protocolos-clinicos-br-base_rl-1gen-14b) — RL only (no CPT), LoRA | 64.2 | 29.4 |
 
 ## Repository layout
 
