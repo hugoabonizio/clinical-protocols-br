@@ -1,6 +1,6 @@
 # Teaching LLMs Brazilian Healthcare
 
-[![HuggingFace Collection](https://img.shields.io/badge/🤗%20Collection-Protocolos%20Cl%C3%ADnicos%20BR-FFD21E)](https://huggingface.co/collections/hugo/protocolos-clinicos-br-69f7a8b93b1c28c0914594ff)
+🤗 [Collection on HuggingFace](https://huggingface.co/collections/hugo/protocolos-clinicos-br-69f7a8b93b1c28c0914594ff) · 🌐 [Blog post](https://hugoabonizio.github.io/clinical-protocols-br/)
 
 Adapting LLMs to the clinical knowledge of Brazil's Unified Health System (SUS) through continual pre-training (CPT) and reinforcement learning (GRPO) on official Ministry of Health guidelines, with two protocol-grounded benchmarks for measuring guideline-specific recall.
 
