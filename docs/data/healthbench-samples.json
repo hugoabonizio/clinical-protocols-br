@@ -1,0 +1,32 @@
+[
+  {
+    "titulo": "Protocolo Clínico e Diretrizes Terapêuticas do Glaucoma",
+    "protocolo": "G_Glaucoma.pdf",
+    "true": "No que diz respeito ao protocolo clínico \"Protocolo Clínico e Diretrizes Terapêuticas do Glaucoma\", a afirmação a seguir é verdadeira ou falsa? Aferição da PIO, idealmente com tonometria de aplanação de Goldmann, deve ser realizada em diferentes dias e horários para reconhecer a flutuação diária antes de definir diagnóstico e gravidade.",
+    "false": "No que diz respeito ao protocolo clínico \"Protocolo Clínico e Diretrizes Terapêuticas do Glaucoma\", a afirmação a seguir é verdadeira ou falsa? Aferição da PIO, idealmente com tonometria de não contato, deve ser realizada em diferentes dias e horários para reconhecer a flutuação diária antes de definir diagnóstico e gravidade."
+  },
+  {
+    "titulo": "Protocolo Clínico e Diretrizes Terapêuticas do Câncer de Mama",
+    "protocolo": "C_Câncere_de_Mama.pdf",
+    "true": "No que diz respeito ao protocolo clínico \"Protocolo Clínico e Diretrizes Terapêuticas do Câncer de Mama\", a afirmação a seguir é verdadeira ou falsa? A descarga papilar sanguinolenta unilateral é um sinal de referência urgente para serviços de diagnóstico mamário, devendo motivar avaliação rápida mesmo em mulheres adultas sem outras alterações clínicas aparentes.",
+    "false": "No que diz respeito ao protocolo clínico \"Protocolo Clínico e Diretrizes Terapêuticas do Câncer de Mama\", a afirmação a seguir é verdadeira ou falsa? A descarga papilar sanguinolenta bilateral é um sinal de referência urgente para serviços de diagnóstico mamário, devendo motivar avaliação rápida mesmo em mulheres adultas sem outras alterações clínicas aparentes."
+  },
+  {
+    "titulo": "Protocolo clínico e diretrizes terapêuticas da hiperprolactinemia",
+    "protocolo": "H_Hiperprolactinemia.pdf",
+    "true": "No que diz respeito ao protocolo clínico \"Protocolo clínico e diretrizes terapêuticas da hiperprolactinemia\", a afirmação a seguir é verdadeira ou falsa? Os prolactinomas são tumores funcionantes mais comuns da hipófise e respondem por cerca de 40% dos adenomas",
+    "false": "No que diz respeito ao protocolo clínico \"Protocolo clínico e diretrizes terapêuticas da hiperprolactinemia\", a afirmação a seguir é verdadeira ou falsa? Os prolactinomas são os tumores mais comuns da hipófise e respondem por cerca de 40% dos adenomas"
+  },
+  {
+    "titulo": "Protocolo clínico e diretrizes terapêuticas do transtorno afetivo bipolar do tipo I",
+    "protocolo": "T_Transtorno_Afetivo_Bipolar_do_tipo_I.pdf",
+    "true": "No que diz respeito ao protocolo clínico \"Protocolo clínico e diretrizes terapêuticas do transtorno afetivo bipolar do tipo I\", a afirmação a seguir é verdadeira ou falsa? Antes do início do tratamento com carbonato de lítio, é necessária a avaliação de hormônio tireotrófico TSH, creatinina e ureia séricos para descartar contraindicações e monitorar potenciais efeitos adversos relacionados ao uso do estabilizador de humor.",
+    "false": "No que diz respeito ao protocolo clínico \"Protocolo clínico e diretrizes terapêuticas do transtorno afetivo bipolar do tipo I\", a afirmação a seguir é verdadeira ou falsa? Antes do início do tratamento com carbonato de lítio, é necessária a avaliação de hormônio tireotrófico TSH, creatinina e potássio séricos para descartar contraindicações e monitorar potenciais efeitos adversos relacionados ao uso do estabilizador de humor."
+  },
+  {
+    "titulo": "Protocolo clínico e diretrizes terapêuticas da artrite reumatoide e da artrite idiopática juvenil",
+    "protocolo": "A_Artrite_Reumatóide_e_Artrite_Idiopática_-_Juvenil_Portaria_Conjunta_n_16.pdf",
+    "true": "No que diz respeito ao protocolo clínico \"Protocolo clínico e diretrizes terapêuticas da artrite reumatoide e da artrite idiopática juvenil\", a afirmação a seguir é verdadeira ou falsa? Radiografias simples são acessíveis e baratas, porém pouco sensíveis para inflamação e lesões iniciais.",
+    "false": "No que diz respeito ao protocolo clínico \"Protocolo clínico e diretrizes terapêuticas da artrite reumatoide e da artrite idiopática juvenil\", a afirmação a seguir é verdadeira ou falsa? Radiografias simples são acessíveis e baratas, apresentando alta sensibilidade para inflamação e lesões iniciais."
+  }
+]

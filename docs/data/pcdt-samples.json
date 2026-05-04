@@ -1,0 +1,27 @@
+[
+  {
+    "titulo": "Protocolo clínico e diretrizes terapêuticas da síndrome de Guillain-Barré",
+    "pergunta": "Quais são os dois tratamentos modificadores de doença preconizados no Protocolo Clínico e Diretrizes Terapêuticas da Síndrome de Guillain-Barré aprovado pela Portaria Conjunta nº 15/2020 do Ministério da Saúde?",
+    "resposta": "Os dois tratamentos modificadores de doença preconizados são a plasmaférese (tratamento não medicamentoso) e a imunoglobulina humana intravenosa (IgIV, tratamento medicamentoso)."
+  },
+  {
+    "titulo": "Protocolo Clínico e Diretrizes Terapêuticas – Esclerose Lateral Amiotrófica",
+    "pergunta": "Segundo o Protocolo Clínico e Diretrizes Terapêuticas da Esclerose Lateral Amiotrófica (PCDT-ELA), qual é o único medicamento com eficácia comprovada e registrado pela ANVISA para o tratamento específico da ELA?",
+    "resposta": "O único medicamento com eficácia comprovada e registrado pela ANVISA para o tratamento específico da ELA é o riluzol."
+  },
+  {
+    "titulo": "Protocolo clínico e diretrizes terapêuticas da insuficiência cardíaca com fração de ejeção reduzida",
+    "pergunta": "Quais são os critérios de inclusão para o uso de sacubitril valsartana sódica hidratada segundo o Protocolo Clínico e Diretrizes Terapêuticas da Insuficiência Cardíaca com Fração de Ejeção Reduzida (Portaria Conjunta SAES/SECTICS nº 10/2024)?",
+    "resposta": "Os critérios de inclusão para o uso de sacubitril valsartana sódica hidratada são: idade inferior a 75 anos, classe funcional NYHA II, fração de ejeção reduzida (≤35%), níveis de BNP > 150 pg/mL ou NT-ProBNP > 600 pg/mL, estar em tratamento otimizado (uso de doses máximas toleradas de IECA ou ARA II, betabloqueadores, espironolactona e diuréticos em caso de congestão) e apresentar sintomas como dispneia aos esforços, sinais de congestão ou piora clínica com internações recentes."
+  },
+  {
+    "titulo": "Protocolo de uso do blinatumomabe para leucemia linfoblástica aguda (lla) b derivada pediátrica em primeira recidiva medular de alto risco",
+    "pergunta": "Quais são os critérios de inclusão para pacientes no Protocolo de Uso do Blinatumomabe para Leucemia Linfoblástica Aguda (LLA) B derivada pediátrica em primeira recidiva medular de alto risco?",
+    "resposta": "Os critérios de inclusão são: idade até 18 anos (19 anos incompletos); diagnóstico inicial e de primeira recidiva por imunofenotipagem com confirmação da linhagem linfoide B (CD19+); primeira recidiva do tratamento para LLA-B classificada como medular de alto risco após tratamento de primeira linha com quimioterapia de indução e dois ciclos de consolidação; e cromossomo Philadelfia negativo."
+  },
+  {
+    "titulo": "Protocolo clínico e diretrizes terapêuticas - hiperplasia adrenal congênita",
+    "pergunta": "Segundo o Protocolo Clínico e Diretrizes Terapêuticas para Hiperplasia Adrenal Congênita (Portaria nº 16/2010), qual é o valor de 17-OH-progesterona em sangue periférico que confirma o diagnóstico de HAC clássica?",
+    "resposta": "Valores de 17-OH-progesterona em sangue periférico maiores que 100 ng/mL (basal ou após estímulo com 250 mcg de ACTH) confirmam o diagnóstico de HAC clássica."
+  }
+]

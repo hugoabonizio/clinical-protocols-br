@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ensinando saúde pública brasileira a LLMs</title>
+<meta name="description" content="Adaptamos o Qwen2.5-14B aos protocolos clínicos brasileiros via dados sintéticos, pré-treino contínuo e GRPO. Lançamos HealthBench-BR e PCDT-QA.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fg: #0f1f3d;
+    --muted: #5f6b80;
+    --rule: #e3e8ee;
+    --bg: #ffffff;
+    --bg-soft: #f5f7fa;
+    --accent: #0a3160;       /* deep navy */
+    --accent-2: #d99e2b;     /* warm gold */
+    --accent-3: #1e7a51;     /* SUS-ish green, used very sparingly */
+    --true: #1e7a51; --true-bg: #e6f4ed;
+    --false: #b3261e; --false-bg: #fbe9e7;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--fg); font-family: 'DM Sans', system-ui, sans-serif; font-size: 17px; line-height: 1.65; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+  /* Top bar with flag-inspired thin stripe */
+  .flag-band { height: 4px; background: linear-gradient(90deg, var(--accent) 0%, var(--accent) 60%, var(--accent-2) 60%, var(--accent-2) 80%, var(--accent-3) 80%, var(--accent-3) 100%); }
+  .topbar { font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 0.7rem 1.5rem; display: flex; justify-content: space-between; color: var(--muted); border-bottom: 1px solid var(--rule); }
+  .topbar a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  /* Hero */
+  .hero { padding: 4rem 0 2rem; background: var(--bg-soft); border-bottom: 1px solid var(--rule); }
+  .hero-inner, main, .footer-inner { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
+  .kicker { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-2); font-weight: 500; }
+  h1 { font-family: 'DM Sans', sans-serif; font-size: 2.3rem; line-height: 1.1; font-weight: 700; margin: 0.7rem 0; letter-spacing: -0.02em; color: var(--accent); font-variation-settings: "opsz" 40; }
+  .lede { color: var(--fg); font-size: 1.12rem; margin: 0 0 1.4rem; max-width: 580px; }
+  .byline { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--muted); }
+  .links { margin-top: 1.2rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .links a { font-size: 0.85rem; padding: 0.45rem 0.9rem; background: var(--accent); color: #fff; border-radius: 4px; text-decoration: none; border: 1px solid var(--accent); transition: opacity 0.15s; }
+  .links a:hover { opacity: 0.85; }
+  .links a.alt { background: #fff; color: var(--accent); }
+  /* Stat hero strip */
+  .stats-hero { background: var(--accent); color: #fff; padding: 2rem 0; }
+  .stats-hero-inner { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; text-align: center; }
+  .stats-hero .n { font-family: 'DM Sans', sans-serif; font-size: 2.4rem; font-weight: 700; line-height: 1; display: block; color: var(--accent-2); font-variation-settings: "opsz" 40; }
+  .stats-hero .l { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-top: 0.4rem; display: block; }
+  main { padding: 3rem 1.5rem 5rem; }
+  h2 { font-size: 1.65rem; margin: 3rem 0 0.7rem; font-weight: 700; color: var(--accent); letter-spacing: -0.01em; }
+  h2 .nb { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--accent-2); font-weight: 500; margin-right: 0.6rem; vertical-align: 0.15em; }
+  h3 { font-size: 1.15rem; margin: 1.7rem 0 0.4rem; font-weight: 600; color: var(--fg); }
+  p { margin: 0 0 1rem; }
+  a { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 2px; text-decoration-color: var(--accent-2); }
+  a:hover { text-decoration-color: var(--accent); }
+  /* TLDR */
+  .tldr { background: var(--bg-soft); border-radius: 8px; padding: 1.2rem 1.4rem; margin: 1.5rem 0; position: relative; padding-left: 4rem; }
+  .tldr::before { content: "TL;DR"; position: absolute; left: 1rem; top: 1.2rem; font-family: 'DM Mono', monospace; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; color: var(--accent-2); }
+  /* Card section */
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .card { background: var(--bg-soft); border-radius: 8px; padding: 1.3rem; border-top: 4px solid var(--accent); }
+  .card.alt { border-top-color: var(--accent-2); }
+  .card h3 { margin-top: 0; font-size: 1.05rem; color: var(--accent); }
+  .card.alt h3 { color: var(--accent-2); }
+  .card .num { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--muted); }
+  /* Tables */
+  .table-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; margin: 1.5rem 0; font-size: 0.92rem; }
+  th, td { padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--rule); }
+  thead th { font-weight: 600; color: var(--accent); background: var(--bg-soft); border-bottom: 2px solid var(--accent); text-align: left; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; font-family: 'DM Mono', monospace; }
+  tr.our td { background: #fdf6e6; font-weight: 600; }
+  tr.our td:first-child { color: var(--accent-2); }
+  /* Chart + gain callout */
+  .chart-wrap { background: var(--bg-soft); border-radius: 8px; padding: 1.4rem; margin: 1.5rem 0; }
+  .gain-callout { background: #fff; border: 1px solid var(--rule); border-left: 4px solid var(--accent-2); border-radius: 8px; padding: 1.1rem 1.3rem; margin: 1.5rem 0 1rem; }
+  .gain-callout .gain-title { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.7rem; }
+  .gain-callout .gain-title strong { color: var(--accent); font-weight: 600; }
+  .gain-row { display: grid; grid-template-columns: 130px 80px 30px 80px 90px; align-items: baseline; gap: 0.4rem; padding: 0.35rem 0; font-variant-numeric: tabular-nums; }
+  .gain-row + .gain-row { border-top: 1px solid var(--rule); }
+  .gain-row .metric { font-size: 0.92rem; color: var(--fg); font-weight: 500; }
+  .gain-row .baseline { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 1.1rem; text-align: right; }
+  .gain-row .arrow { color: var(--accent-2); font-size: 1.1rem; text-align: center; }
+  .gain-row .ours { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 1.4rem; font-weight: 700; text-align: right; }
+  .gain-row .delta { font-family: 'DM Mono', monospace; font-size: 0.95rem; color: var(--accent-3); font-weight: 600; padding-left: 0.5rem; }
+  /* Tabs — segmented + visually connected to carousel */
+  .tabs-hint { font-size: 0.82rem; color: var(--muted); margin: 1.2rem 0 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
+  .tabs-hint .arrow { color: var(--accent-2); }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 0; border: 1px solid var(--rule); border-bottom: none; border-radius: 8px 8px 0 0; overflow: hidden; }
+  .tab-btn { background: var(--bg-soft); border: none; border-right: 1px solid var(--rule); padding: 0.85rem 1rem; cursor: pointer; font-family: inherit; font-size: 0.95rem; font-weight: 500; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: background 0.15s, color 0.15s; position: relative; }
+  .tab-btn:last-child { border-right: none; }
+  .tab-btn:hover:not(.active) { background: #ebf0f4; color: var(--accent); }
+  .tab-btn.active { background: #fff; color: var(--accent); font-weight: 600; cursor: default; }
+  .tab-btn.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--accent); }
+  .tab-btn:not(.active)::before { content: "↗"; font-size: 0.85rem; color: var(--accent-2); opacity: 0.7; }
+  .tab-panel { display: none; } .tab-panel.active { display: block; }
+  .carousel { background: #fff; border: 1px solid var(--rule); border-top: none; border-radius: 0 0 8px 8px; overflow: hidden; }
+  .carousel-body { padding: 1.3rem; }
+  .src { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--muted); margin-bottom: 0.7rem; }
+  .qa { padding: 0.8rem 1rem; margin-bottom: 0.7rem; border-radius: 6px; }
+  .qa .label { font-family: 'DM Mono', monospace; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.3rem; display: block; }
+  .qa .text { font-size: 0.95rem; line-height: 1.55; }
+  .qa-true { background: var(--true-bg); border-left: 3px solid var(--true); } .qa-true .label { color: var(--true); }
+  .qa-false { background: var(--false-bg); border-left: 3px solid var(--false); } .qa-false .label { color: var(--false); }
+  .qa-q { background: var(--bg-soft); border-left: 3px solid var(--accent); } .qa-q .label { color: var(--accent); }
+  .qa-a { background: #fdf6e6; border-left: 3px solid var(--accent-2); } .qa-a .label { color: var(--accent-2); }
+  .carousel-nav { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 1rem; background: var(--bg-soft); border-top: 1px solid var(--rule); }
+  .nav-btn { background: var(--accent); color: #fff; border: none; width: 36px; height: 36px; cursor: pointer; border-radius: 999px; font-size: 1.1rem; }
+  .nav-btn:hover:not(:disabled) { opacity: 0.85; }
+  .nav-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+  .nav-counter { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--muted); }
+  figure { margin: 2rem 0; text-align: center; }
+  figure img { max-width: 100%; border: 1px solid var(--rule); border-radius: 6px; }
+  figcaption { font-size: 0.85rem; color: var(--muted); margin-top: 0.6rem; line-height: 1.5; font-style: italic; }
+  footer { background: var(--accent); color: #c8d3e2; padding: 2.5rem 0; margin-top: 4rem; font-size: 0.88rem; }
+  footer a { color: var(--accent-2); }
+  footer p { margin: 0.3rem 0; }
+  @media (max-width: 700px) {
+    body { font-size: 16px; }
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.35rem; margin-top: 2.4rem; }
+    .hero { padding: 2.5rem 0 1.5rem; }
+    .stats-hero { padding: 1.5rem 0; }
+    .stats-hero-inner { grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+    .stats-hero .n { font-size: 1.9rem; }
+    main { padding: 2rem 1.2rem 3.5rem; }
+    .cards { grid-template-columns: 1fr; }
+    .links a { font-size: 0.8rem; padding: 0.4rem 0.7rem; }
+    .topbar { padding: 0.6rem 1rem; font-size: 0.72rem; }
+    .tldr { padding-left: 1.2rem; padding-top: 2.5rem; }
+    .tldr::before { top: 0.9rem; }
+    .gain-row {
+      grid-template-columns: auto auto auto auto;
+      grid-template-rows: auto auto;
+      gap: 0.15rem 0.45rem;
+      padding: 0.7rem 0;
+      justify-content: start;
+      align-items: baseline;
+    }
+    .gain-row .metric { grid-column: 1 / -1; grid-row: 1; margin-bottom: 0.25rem; }
+    .gain-row .baseline { grid-column: 1; grid-row: 2; text-align: left; font-size: 1rem; }
+    .gain-row .arrow    { grid-column: 2; grid-row: 2; font-size: 1rem; }
+    .gain-row .ours     { grid-column: 3; grid-row: 2; text-align: left; font-size: 1.2rem; }
+    .gain-row .delta    { grid-column: 4; grid-row: 2; font-size: 0.9rem; padding-left: 0.3rem; }
+    table { font-size: 0.85rem; }
+    th, td { padding: 0.4rem 0.5rem; }
+  }
+  @media (max-width: 380px) {
+    .hero-inner, main, .footer-inner, .stats-hero-inner { padding-left: 1rem; padding-right: 1rem; }
+    .stats-hero-inner { grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .stats-hero .n { font-size: 1.6rem; }
+    h1 { font-size: 1.55rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="flag-band"></div>
+<div class="topbar">
+  <span>Abonizio et al. · 2026</span>
+  <span>PT · <a href="post.en.html">EN</a></span>
+</div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">Paper · NLP clínico em português</span>
+    <h1>Ensinando saúde pública brasileira a LLMs</h1>
+    <p class="lede">Apresentamos dois benchmarks ancorados nos protocolos oficiais do SUS — <strong>HealthBench-BR</strong> e <strong>PCDT-QA</strong> — e mostramos como adaptar um modelo aberto de 14B parâmetros pra superar os modelos de fronteira em conhecimento dos protocolos do SUS.</p>
+    <div class="links">
+      <a href="paper.pdf">📄 Paper (PDF)</a>
+      <a href="https://huggingface.co/datasets/hugo/healthbench-br" class="alt">🤗 HealthBench-BR</a>
+      <a href="https://huggingface.co/datasets/hugo/pcdt-qa" class="alt">🤗 PCDT-QA</a>
+      <a href="https://github.com/hugoabonizio/clinical-protocols-br" class="alt">💻 Código</a>
+    </div>
+  </div>
+</header>
+
+<section class="stats-hero">
+  <div class="stats-hero-inner">
+    <div><span class="n">178</span><span class="l">Protocolos do SUS</span></div>
+    <div><span class="n">~70M</span><span class="l">Tokens sintéticos</span></div>
+    <div><span class="n">14B</span><span class="l">Parâmetros</span></div>
+    <div><span class="n">83,9%</span><span class="l">Em HealthBench-BR</span></div>
+  </div>
+</section>
+
+<main>
+
+<div class="tldr">
+Lançamos dois benchmarks abertos ancorados nos protocolos oficiais do Ministério da Saúde: <strong>HealthBench-BR</strong> (1.780 afirmações verdadeiro/falso) e <strong>PCDT-QA</strong> (890 perguntas abertas julgadas por LLM). E adaptamos o Qwen2.5-14B-Instruct aos protocolos via dados sintéticos (~70M tokens), pré-treino contínuo e RL (GRPO), atingindo 83,9% no HealthBench-BR e 85,4% no PCDT-QA — superando GPT-5.2, Claude Sonnet 4.6, Gemini 3.1 Pro e o Google AI Overview.
+</div>
+
+<h2><span class="nb">01</span>O problema</h2>
+<p>O SUS atende mais de 200 milhões de pessoas guiado por <a href="https://www.gov.br/saude/pt-br/assuntos/pcdt"><strong>protocolos clínicos oficiais</strong></a> publicados pelo Ministério da Saúde — Protocolos Clínicos e Diretrizes Terapêuticas (PCDTs), Protocolos de Uso, Diretrizes Diagnósticas e Terapêuticas em Oncologia, Diretrizes Brasileiras e Linhas de Cuidado. Eles definem critérios diagnósticos, doses, esquemas terapêuticos e parâmetros de monitoramento, e seguir esses protocolos é obrigatório para gestores do SUS.</p>
+<p>Mas LLMs atuais — mesmo os modelos de fronteira — são treinados majoritariamente em literatura médica em inglês. Não havia, antes deste trabalho, nenhum benchmark que medisse a acurácia factual ancorada em protocolos brasileiros, e nenhum modelo aberto havia sido especificamente adaptado aos PCDTs oficiais do SUS.</p>
+
+<h2><span class="nb">02</span>Pipeline</h2>
+<p>A partir dos 178 protocolos clínicos (~5,4M tokens), geramos <strong>17.800 documentos sintéticos (~70M tokens)</strong> em três formatos complementares — paráfrase, artigo estilo Wikipedia e perguntas-e-respostas — usando quatro geradores diferentes (GPT-4.1-mini, GPT-5-nano, GPT-OSS-20B, Qwen3-235B). Esse corpus é usado pra continual pre-training do Qwen2.5-14B-Instruct, seguido de GRPO usando o split de treino do HealthBench-BR como sinal de recompensa.</p>
+<figure>
+  <img src="img/figure1-pipeline.svg" alt="Pipeline">
+  <figcaption>Figura 1. Visão geral do pipeline. Rephrases e wiki-articles são gerados de todos os 178 protocolos; QA pairs apenas dos 89 protocolos de treino, prevenindo vazamento.</figcaption>
+</figure>
+
+<h2><span class="nb">03</span>Os benchmarks</h2>
+<p>Como uma das contribuições centrais do trabalho, <strong>lançamos dois benchmarks abertos</strong> derivados diretamente dos protocolos oficiais — feitos pra medir, de forma reprodutível, o quanto um modelo absorve do conhecimento clínico brasileiro:</p>
+
+<div class="cards">
+  <div class="card">
+    <h3>HealthBench-BR</h3>
+    <p class="num">1.780 itens · pareados V/F</p>
+    <p style="font-size: 0.92rem; margin-top: 0.6rem;">Afirmações verdadeiro/falso pareadas. Para cada fato, geramos uma versão verdadeira e uma versão falsa modificando um detalhe crítico (dose, via, intervalo). Acerto exige recordação factual precisa.</p>
+  </div>
+  <div class="card alt">
+    <h3>PCDT-QA</h3>
+    <p class="num">890 itens · LLM-as-judge</p>
+    <p style="font-size: 0.92rem; margin-top: 0.6rem;">Perguntas abertas com resposta de referência, julgadas por GPT-4.1 numa decisão binária correto/incorreto. Cobrem desde tópicos amplos até consultas factuais específicas.</p>
+  </div>
+</div>
+
+<figure>
+  <img src="img/figure2-benchmarks.svg" alt="Exemplos">
+  <figcaption>Figura 2. Exemplos dos benchmarks.</figcaption>
+</figure>
+
+<h3>Exemplos</h3>
+<p class="tabs-hint"><span class="arrow">↔</span> Clique nas abas pra alternar entre os dois datasets:</p>
+<div class="tabs" role="tablist">
+  <button class="tab-btn active" data-tab="hb" role="tab" aria-selected="true">HealthBench-BR</button>
+  <button class="tab-btn" data-tab="pq" role="tab" aria-selected="false">PCDT-QA</button>
+</div>
+<div class="tab-panel active" id="tab-hb">
+  <div class="carousel">
+    <div class="carousel-body">
+      <div class="src" id="src-hb">—</div>
+      <div class="qa qa-true"><span class="label">✓ Verdadeiro</span><div class="text" id="hb-true">—</div></div>
+      <div class="qa qa-false"><span class="label">✗ Falso</span><div class="text" id="hb-false">—</div></div>
+    </div>
+    <div class="carousel-nav">
+      <button class="nav-btn" id="hb-prev">‹</button>
+      <span class="nav-counter" id="hb-counter">1 / 5</span>
+      <button class="nav-btn" id="hb-next">›</button>
+    </div>
+  </div>
+</div>
+<div class="tab-panel" id="tab-pq">
+  <div class="carousel">
+    <div class="carousel-body">
+      <div class="src" id="src-pq">—</div>
+      <div class="qa qa-q"><span class="label">Q · Pergunta</span><div class="text" id="pq-q">—</div></div>
+      <div class="qa qa-a"><span class="label">A · Resposta de referência</span><div class="text" id="pq-a">—</div></div>
+    </div>
+    <div class="carousel-nav">
+      <button class="nav-btn" id="pq-prev">‹</button>
+      <span class="nav-counter" id="pq-counter">1 / 5</span>
+      <button class="nav-btn" id="pq-next">›</button>
+    </div>
+  </div>
+</div>
+
+<h2><span class="nb">04</span>Resultados principais</h2>
+<p>O modelo final supera todos os baselines proprietários — incluindo Gemini 3.1 Pro, o mais forte deles — em ambos benchmarks. Mesmo o Google AI Overview (busca + LLM, com vantagem inerente: abstém-se de responder em 11,7% das perguntas do HB-BR e 4,9% do PCDT-QA) fica atrás:</p>
+
+<div class="gain-callout">
+  <div class="gain-title">Saímos do baseline <strong>Qwen2.5-14B-Instruct</strong> e chegamos a:</div>
+  <div class="gain-row">
+    <span class="metric">HealthBench-BR</span>
+    <span class="baseline">59,4</span>
+    <span class="arrow">→</span>
+    <span class="ours">83,9</span>
+    <span class="delta">+24,5</span>
+  </div>
+  <div class="gain-row">
+    <span class="metric">PCDT-QA</span>
+    <span class="baseline">27,9</span>
+    <span class="arrow">→</span>
+    <span class="ours">85,4</span>
+    <span class="delta">+57,5</span>
+  </div>
+</div>
+
+<div class="chart-wrap"><canvas id="mainChart" height="240"></canvas></div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Modelo</th><th class="num">HealthBench-BR</th><th class="num">PCDT-QA</th></tr></thead>
+  <tbody>
+    <tr><td><a href="https://huggingface.co/Qwen/Qwen2.5-14B-Instruct">Qwen2.5-14B</a> (baseline)</td><td class="num">59,4</td><td class="num">27,9</td></tr>
+    <tr><td><a href="https://huggingface.co/hugo/protocolos-clinicos-br-cpt-1gen-14b">+ CPT</a></td><td class="num">69,6</td><td class="num">66,3</td></tr>
+    <tr><td><a href="https://huggingface.co/hugo/protocolos-clinicos-br-cpt-4gen-14b">+ CPT (4 geradores)</a></td><td class="num">71,1</td><td class="num">86,3</td></tr>
+    <tr class="our"><td><a href="https://huggingface.co/hugo/protocolos-clinicos-br-rl-4gen-14b">+ CPT (4 geradores) + GRPO</a></td><td class="num">83,9</td><td class="num">85,4</td></tr>
+    <tr><td>GPT-4.1</td><td class="num">73,3</td><td class="num">70,3</td></tr>
+    <tr><td>GPT-5.2 (high)</td><td class="num">78,5</td><td class="num">78,2</td></tr>
+    <tr><td>Claude Sonnet 4.6</td><td class="num">77,6</td><td class="num">70,3</td></tr>
+    <tr><td>Gemini 3.1 Pro</td><td class="num">79,3</td><td class="num">80,0</td></tr>
+    <tr><td>Google AI Overview</td><td class="num">70,5</td><td class="num">77,3</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2><span class="nb">05</span>Diversidade de geradores importa mais que escala</h2>
+<p>O ganho mais expressivo veio da combinação de quatro modelos geradores diferentes ao invés de um só. Com um gerador (GPT-4.1-mini), CPT atinge 66,3% no PCDT-QA. Com quatro, salta pra 86,3% — <strong>+20 pontos</strong>.</p>
+<p>Notavelmente, <em>tamanho do gerador isolado não traduz em ganho</em>: o Qwen3-235B (235B parâmetros) sozinho não domina nenhum benchmark, e auto-aumentar com o próprio Qwen2.5-14B-Instruct é o caso <em>mais fraco</em> (60,2% HB / 50,1% PCDT) — porque seus outputs são curtos demais (~1.594 tokens em média contra 3.471-4.551 dos demais), omitindo doses e detalhes de monitoramento. Diversidade de fraseado e estilo importa mais que volume bruto de tokens.</p>
+
+<h2><span class="nb">06</span>RL corrige a bajulação introduzida pelo CPT</h2>
+<p>HealthBench-BR é perfeitamente balanceado (50% verdadeiro / 50% falso). O Qwen2.5-14B base é bem calibrado (49,9% de "Verdadeiro"), mas o CPT introduz viés pra concordar (58,9%) — provavelmente porque o corpus tende a frasear afirmativamente. <strong>O GRPO corrige</strong>: nosso melhor modelo volta pra 53,0%, e o ganho de acurácia em HB é <strong>+12,8 pontos</strong> sobre CPT puro.</p>
+<p>Entre modelos de fronteira, Claude Sonnet 4.6 (49,2%) e GPT-5.2-high (48,7%) são bem calibrados; Gemini 3.1 Pro tem viés moderado (63,3%). O <strong>Google AI Overview é o sistema mais bajulador</strong> avaliado: prediz "Verdadeiro" em 69,6% das vezes — preocupante dado que ele é hoje a fonte default de informação clínica gerada por IA no Google Search.</p>
+
+<h2><span class="nb">07</span>RAG empurra ainda mais o desempenho</h2>
+<p>Combinar nosso melhor modelo com retrieval (top-10 chunks dos protocolos) chega a <strong>95,3% no HB-BR e 93,3% no PCDT-QA</strong>. Detalhe interessante: o tipo de retrieval interage com o formato da tarefa — BM25 ganha no HB (verificação lexical de doses/intervalos), embeddings ganham no PCDT (recuperação semântica). E há uma observação contraintuitiva: <em>CPT puro + RAG piora</em> o HB-BR (73,9% vs 90,0% da baseline + RAG), porque o modelo treinado tende a confiar nos próprios parâmetros e ignorar a evidência. O GRPO reverte isso completamente — a recompensa de verdadeiro/falso ensina o modelo a ancorar a resposta no contexto.</p>
+
+<h2><span class="nb">08</span>Esquecimento catastrófico</h2>
+<p>Treinar em domínio clínico pode degradar capacidades gerais. Avaliamos em 5 benchmarks fora-de-distribuição (HealthQA-BR, DrBode, MedPT, BLUEX, IFEval) comparando Full FT, LoRA e Replay (mistura 1:1 com FineWeb). Achados: Full FT fica no lado favorável da fronteira conhecimento↔retenção; LoRA, contraintuitivamente, perde em <em>ambos</em> eixos — consistente com o efeito de <em>intruder dimensions</em> reportado por Shuttleworth et al.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Dados</th><th>Método</th><th class="num">HB</th><th class="num">PCDT</th><th class="num">HealthQA</th><th class="num">DrBode</th><th class="num">MedPT</th><th class="num">BLUEX</th><th class="num">IFEval</th><th class="num">Avg</th></tr></thead>
+  <tbody>
+    <tr><td>—</td><td>Baseline</td><td class="num">59,4</td><td class="num">27,9</td><td class="num">67,8</td><td class="num">65,3</td><td class="num">56,4</td><td class="num">75,0</td><td class="num">79,7</td><td class="num">68,8</td></tr>
+    <tr><td rowspan="3">1 gen</td><td><a href="https://huggingface.co/hugo/protocolos-clinicos-br-cpt-1gen-14b">Full FT</a></td><td class="num">69,6</td><td class="num">66,3</td><td class="num">66,0</td><td class="num">62,7</td><td class="num">56,4</td><td class="num">73,5</td><td class="num">75,8</td><td class="num">66,9</td></tr>
+    <tr><td><a href="https://huggingface.co/hugo/protocolos-clinicos-br-cpt_lora-1gen-14b">LoRA</a></td><td class="num">67,2</td><td class="num">65,2</td><td class="num">64,1</td><td class="num">56,6</td><td class="num">53,8</td><td class="num">71,1</td><td class="num">68,6</td><td class="num">62,8</td></tr>
+    <tr><td><a href="https://huggingface.co/hugo/protocolos-clinicos-br-cpt_replay-1gen-14b">Replay</a></td><td class="num">63,8</td><td class="num">65,6</td><td class="num">67,0</td><td class="num">64,5</td><td class="num">55,9</td><td class="num">72,7</td><td class="num">77,1</td><td class="num">67,4</td></tr>
+    <tr><td rowspan="3">4 gen</td><td><a href="https://huggingface.co/hugo/protocolos-clinicos-br-cpt-4gen-14b">Full FT</a></td><td class="num">71,1</td><td class="num">86,3</td><td class="num">63,3</td><td class="num">61,2</td><td class="num">54,1</td><td class="num">72,8</td><td class="num">69,3</td><td class="num">64,1</td></tr>
+    <tr><td><a href="https://huggingface.co/hugo/protocolos-clinicos-br-cpt_lora-4gen-14b">LoRA</a></td><td class="num">70,3</td><td class="num">77,1</td><td class="num">60,8</td><td class="num">58,3</td><td class="num">52,1</td><td class="num">68,9</td><td class="num">65,6</td><td class="num">61,1</td></tr>
+    <tr><td>Replay</td><td class="num">69,2</td><td class="num">80,0</td><td class="num">65,7</td><td class="num">59,2</td><td class="num">54,0</td><td class="num">73,2</td><td class="num">69,3</td><td class="num">64,3</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2><span class="nb">09</span>Considerações éticas</h2>
+<p>O modelo é desenvolvido pra <em>apoiar</em>, não substituir, decisões clínicas. Mesmo a 83,9% de acurácia, erros residuais podem envolver detalhes consequentes (doses, contraindicações). É um modelo de pesquisa, não dispositivo médico certificado, e deve ser usado apenas sob supervisão profissional.</p>
+<p>Como todos os dados de treino vêm de documentos públicos do Ministério da Saúde, riscos de privacidade derivados de prontuários são evitados — mas vieses dos documentos-fonte e dos modelos geradores podem persistir. Nossos resultados sobre bajulação reforçam que sistemas de IA clínica precisam ser avaliados <em>não só</em> por acurácia, mas também pela tendência de confirmar afirmações falsas dos usuários. Liberar pesos abertos treinados em protocolos brasileiros é um passo em direção a acesso equitativo pra clínicos e pacientes lusófonos historicamente subatendidos por LLMs centrados em inglês.</p>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <p>Paper: <a href="paper.pdf">paper.pdf</a></p>
+    <p>Repositório: <a href="https://github.com/hugoabonizio/clinical-protocols-br">github.com/hugoabonizio/clinical-protocols-br</a></p>
+    <p>Datasets: <a href="https://huggingface.co/datasets/hugo/healthbench-br">HealthBench-BR</a>, <a href="https://huggingface.co/datasets/hugo/pcdt-qa">PCDT-QA</a></p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
+  const t = btn.dataset.tab;
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    const on = b.dataset.tab === t;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', on);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + t));
+}));
+function setupCarousel(prefix, samples, render) {
+  let idx = 0;
+  const c = document.getElementById(prefix + '-counter'), p = document.getElementById(prefix + '-prev'), n = document.getElementById(prefix + '-next');
+  function update() { render(samples[idx]); c.textContent = (idx+1) + ' / ' + samples.length; p.disabled = idx===0; n.disabled = idx===samples.length-1; }
+  p.addEventListener('click', () => { if (idx>0) { idx--; update(); } });
+  n.addEventListener('click', () => { if (idx<samples.length-1) { idx++; update(); } });
+  update();
+}
+const strip = t => t.replace(/^No que diz respeito ao protocolo clínico "[^"]+", a afirmação a seguir é verdadeira ou falsa\?\s*/i, '');
+Promise.all([fetch('data/healthbench-samples.json').then(r=>r.json()), fetch('data/pcdt-samples.json').then(r=>r.json())]).then(([hb, pq]) => {
+  setupCarousel('hb', hb, s => { document.getElementById('src-hb').textContent = 'Fonte: ' + s.titulo; document.getElementById('hb-true').textContent = strip(s.true); document.getElementById('hb-false').textContent = strip(s.false); });
+  setupCarousel('pq', pq, s => { document.getElementById('src-pq').textContent = 'Fonte: ' + s.titulo; document.getElementById('pq-q').textContent = s.pergunta; document.getElementById('pq-a').textContent = s.resposta; });
+});
+new Chart(document.getElementById('mainChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Qwen2.5-14B (baseline)', 'GPT-4.1', 'Google AI Overview', 'Claude Sonnet 4.6', 'GPT-5.2 (high)', 'Gemini 3.1 Pro', 'Nosso (CPT 4 gen + RL)'],
+    datasets: [
+      { label: 'HealthBench-BR', data: [59.4, 73.3, 70.5, 77.6, 78.5, 79.3, 83.9], backgroundColor: '#0a3160' },
+      { label: 'PCDT-QA',        data: [27.9, 70.3, 77.3, 70.3, 78.2, 80.0, 85.4], backgroundColor: '#d99e2b' },
+    ]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom' },
+      tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.x.toFixed(1) + '%' } }
+    },
+    scales: {
+      x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#eef2f6' } },
+      y: { ticks: { font: { size: 12 } }, grid: { display: false } }
+    }
+  }
+});
+</script>
+</body>
+</html>
