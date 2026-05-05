@@ -1,6 +1,6 @@
 # Teaching LLMs Brazilian Healthcare
 
-🤗 [Collection on HuggingFace](https://huggingface.co/collections/hugo/protocolos-clinicos-br-69f7a8b93b1c28c0914594ff) · 🌐 [Blog post](https://hugoabonizio.github.io/clinical-protocols-br/)
+📄 [Paper (arXiv)](https://arxiv.org/abs/2605.01077) · 🤗 [Collection on HuggingFace](https://huggingface.co/collections/hugo/protocolos-clinicos-br-69f7a8b93b1c28c0914594ff) · 🌐 [Blog post](https://hugoabonizio.github.io/clinical-protocols-br/)
 
 Adapting LLMs to the clinical knowledge of Brazil's Unified Health System (SUS) through continual pre-training (CPT) and reinforcement learning (GRPO) on official Ministry of Health guidelines, with two protocol-grounded benchmarks for measuring guideline-specific recall.
 
@@ -71,9 +71,13 @@ forgetting/        # OOD benchmarks (BLUEX, MMLU/ARC/HellaSwag, IFEval, HealthQA
 ## Citation
 
 ```bibtex
-@article{TBD,
+@misc{abonizio2026teaching,
   title={Teaching LLMs Brazilian Healthcare: Injecting Knowledge from Official Clinical Guidelines},
   author={Abonizio, Hugo and Lopes, Filipe Rocha and Lotufo, Roberto and Nogueira, Rodrigo},
-  year={2026}
+  year={2026},
+  eprint={2605.01077},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+  url={https://arxiv.org/abs/2605.01077}
 }
 ```
